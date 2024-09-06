@@ -12,7 +12,7 @@ export default function MessageInputBox({ onSay }) {
 
     useEffect(() => {
         const listener = e => {
-            if (e.key === 'Enter' && !e.shiftKey && document.activeElement === messageBoxRef) {
+            if (e.key === 'Enter' && !e.shiftKey && document.activeElement === messageBoxRef.current) {
                 e.preventDefault();
 
                 handleMessageButtonClick();
