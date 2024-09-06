@@ -3,6 +3,7 @@ import ContentEditable from "react-contenteditable";
 
 export default function MessageInputBox({ onSay }) {
     const text = useRef('');
+    const messageBoxRef = useRef();
 
     async function handleMessageButtonClick() {
         onSay(text.current);
@@ -11,7 +12,7 @@ export default function MessageInputBox({ onSay }) {
 
     useEffect(() => {
         const listener = e => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter' && !e.shiftKey && document.activeElement === messageBoxRef) {
                 e.preventDefault();
 
                 handleMessageButtonClick();
@@ -36,6 +37,7 @@ export default function MessageInputBox({ onSay }) {
                     html={text.current}
                     onChange={e => text.current = e.target.value}
                     style={{ flex: 7 }}
+                    innerRef={messageBoxRef}
                 />
                 &nbsp;
                 <button 
