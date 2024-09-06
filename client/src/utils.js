@@ -1,5 +1,12 @@
-export async function apiCall() {
-
+export async function apiCall(method, endpoint, body, token) {
+    return await (await fetch(`/api${endpoint}`, {
+        method,
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: token && `Bearer ${token}`
+        },
+        body: body && JSON.stringify(body)
+    })).json();
 }
 
 export async function claudeApiCall(bodyObject) {
