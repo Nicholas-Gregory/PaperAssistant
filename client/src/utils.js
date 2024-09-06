@@ -3,21 +3,28 @@ export async function apiCall() {
 }
 
 export async function claudeApiCall(bodyObject) {
-    // Don't use up my credits!!
-    // const body = JSON.stringify(bodyObject);
-    // const response = await fetch('/claude', {
-    //     method: 'POST',
-    //     headers: {
-    //         'x-api-key': import.meta.env.VITE_CLAUDE_API_KEY,
-    //         'content-type': 'application/json',
-    //         'anthropic-version': '2023-06-01'
-    //     },
-    //     body
-    // });
+    const body = JSON.stringify(bodyObject);
+    const response = await fetch('/claude', {
+        method: 'POST',
+        headers: {
+            'x-api-key': import.meta.env.VITE_CLAUDE_API_KEY,
+            'content-type': 'application/json',
+            'anthropic-version': '2023-06-01'
+        },
+        body
+    });
 
-    // if (response.ok) {
-    //     return await response.json();
-    // }
+    if (response.ok) {
+        return await response.json();
+    }
 
-    return { content: [{ text: 'Lorem ipsum odor amet, consectetuer adipiscing elit. Ante adipiscing ultricies tristique; commodo varius dignissim interdum. Ac lobortis ridiculus tincidunt tristique consectetur maecenas eleifend. Ut condimentum nunc arcu in vehicula libero tortor dapibus vivamus. Enim condimentum facilisis fusce ut sit non quis senectus! Quisque faucibus nisl urna est porta nostra tellus dolor eu. Placerat porttitor sollicitudin integer, justo sollicitudin sociosqu scelerisque. Ac quis enim imperdiet leo, lacinia felis. Id tellus dapibus efficitur commodo faucibus tristique molestie nulla.' }] };
+    return { 
+        role: 'assistant', 
+        content: [
+            { 
+                type: 'text', 
+                text: 'Lorem ipsum odor amet, consectetuer adipiscing elit. Ante adipiscing ultricies tristique; commodo varius dignissim interdum. Ac lobortis ridiculus tincidunt tristique consectetur maecenas eleifend. Ut condimentum nunc arcu in vehicula libero tortor dapibus vivamus. Enim condimentum facilisis fusce ut sit non quis senectus! Quisque faucibus nisl urna est porta nostra tellus dolor eu. Placerat porttitor sollicitudin integer, justo sollicitudin sociosqu scelerisque. Ac quis enim imperdiet leo, lacinia felis. Id tellus dapibus efficitur commodo faucibus tristique molestie nulla.' 
+            }
+        ] 
+    };
 }
