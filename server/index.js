@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const db = require('./config/connections.js');
 const routes = require('./routes');
+const { err } = require('./middleware');
 
 const PORT = process.env.PORT || 3001;
 
@@ -11,6 +12,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(routes);
+app.use(err);
 
 db.once('open', () => {
     app.listen(PORT, () => {
