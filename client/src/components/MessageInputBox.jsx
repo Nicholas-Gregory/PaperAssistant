@@ -1,5 +1,4 @@
-import { useRef, useState } from "react"
-import { claudeApiCall } from "../utils";
+import { useEffect, useRef } from "react"
 import ContentEditable from "react-contenteditable";
 
 export default function MessageInputBox({ onSay }) {
@@ -9,6 +8,20 @@ export default function MessageInputBox({ onSay }) {
         onSay(text.current);
         text.current = '';
     }
+
+    useEffect(() => {
+        const listener = e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+
+                handleMessageButtonClick();
+            }
+        }
+
+        window.addEventListener('keydown', listener);
+
+        return () => window.removeEventListener('keydown', listener);
+    }, [handleMessageButtonClick]);
 
     return (
         <>
