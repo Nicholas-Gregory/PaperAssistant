@@ -10,6 +10,9 @@ module.exports = (err, req, res, next) => {
         case 'ResourceNotFoundError':
             res.status(404);
             break;
+        case 'ForbiddenResourceError':
+            res.status(403);
+            break;
         default:
             res.status(500);
     }
