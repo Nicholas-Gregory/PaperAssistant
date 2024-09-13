@@ -103,21 +103,20 @@ export default function Canvas({}) {
             }],
             children: []
         };
-        const claudeResponse = await claudeApiCall({
+        const claudeResponse = await apiCall('POST', '/claude', {
             model: 'claude-3-5-sonnet-20240620',
             max_tokens: 5000,
             messages: [{
                 role: 'user',
                 content: userContextData.content
             }]
-        });
+        }, token);
         const responseContextData = {
             role: 'assistant',
             content: [{
                 type: 'text',
                 text: claudeResponse.content[0].text
             }]
-
         }
         const claudeApiResponse = await apiCall('POST', '/context', responseContextData, token)
         const apiResponse = await apiCall('POST', '/context', userContextData, token);
@@ -128,13 +127,13 @@ export default function Canvas({}) {
         }
 
         if (claudeResponse.error) {
-            setError(claudeResponse.error.message);
+            setError(claudeResponse.type);
             return;
         }
 
         setUser({
             ...user,
-            contexts: [...user.contexts, apiResponse]
+            contexts: [...user.contexts, apiResponse, claudeApiResponse]
         });
 
         setBoxes(initializeBoxes());

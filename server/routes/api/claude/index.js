@@ -1,0 +1,26 @@
+const router = require('express').Router();
+const axios = require('axios');
+const { auth } = require('../../../middleware');
+const ClaudeError = require('../../../errors/ClaudeError');
+
+router.post('/', auth, async (req, res, next) => {
+    const claudeBody = req.body;
+    console.log(claudeBody)
+
+    try {
+        const response = await axios.post('https://api.anthropic.com/v1/messages', claudeBody, {
+            headers: {
+                'x-api-key': process.env.VITE_CLAUDE_API_KEY,
+                'content-type': 'application/json',
+                'anthropic-version': '2023-06-01'
+            }
+        });
+        const data = response.data;
+
+        return res.status(200).json(data);
+    } catch (error) {
+        return next(error);
+    }
+});
+
+module.exports = router;
