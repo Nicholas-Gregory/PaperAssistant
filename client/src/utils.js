@@ -16,7 +16,8 @@ export async function claudeApiCall(bodyObject) {
         headers: {
             'x-api-key': import.meta.env.VITE_CLAUDE_API_KEY,
             'content-type': 'application/json',
-            'anthropic-version': '2023-06-01'
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': true
         },
         body
     });

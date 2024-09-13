@@ -11,7 +11,8 @@ export default function Canvas({}) {
     const [boxes, setBoxes] = useState(initializeBoxes());
     const [creatingNewContext, setCreatingNewContext] = useState(false);
     const [error, setError] = useState(null);
-    const listener = useRef(() => {});
+    const mouseMoveListener = useRef(() => {});
+    const mouseUpListener = useRef(() => {});
 
     function initializeBoxes() {
         const contexts = user.contexts;
@@ -25,7 +26,8 @@ export default function Canvas({}) {
                 _id, visible,
                 position: { x: 0, y: 0 },
                 scale: { x: 200, y: 400 },
-                backgroundColor: context.role === 'user' ? 'turquoise' : 'teal'
+                backgroundColor: context.role === 'user' ? 'turquoise' : 'teal',
+                topbarColor: 'cyan'
             });
         }
 
@@ -47,10 +49,17 @@ export default function Canvas({}) {
         const offsetX = getOffset('x', e.clientX, box);
         const offsetY = getOffset('y', e.clientY, box);
 
-        listener.current = e => {
+        setBoxes(boxes => boxes.map(box => (
+            box._id === id ? ({
+                ...box,
+                topbarColor: 'darkcyan'
+            }) : box
+        )));
+
+        mouseMoveListener.current = e => {
             e.preventDefault();
 
-            setBoxes(boxes.map(box => box._id === id ? (
+            setBoxes(boxes => boxes.map(box => box._id === id ? (
                 {
                     ...box,
                     position: {
@@ -61,12 +70,27 @@ export default function Canvas({}) {
             ) : box))
         };
 
-        window.addEventListener('mousemove', listener.current);
+        mouseUpListener.current = () => {
+            window.removeEventListener('mousemove', mouseMoveListener.current);
+            window.removeEventListener('mouseup', mouseUpListener.current);
+
+            setBoxes(boxes => boxes.map(box => (
+                box._id === id ? (
+                    {
+                        ...box,
+                        topbarColor: 'cyan'
+                    }
+                ) : box
+            )));
+        };
+
+        window.addEventListener('mouseup', mouseUpListener.current);
+        window.addEventListener('mousemove', mouseMoveListener.current);
     }
 
     function handleRelease(id) {
-        window.removeEventListener('mousemove', listener.current);
-        listener.current = () => {};
+        window.removeEventListener('mousemove', mouseMoveListener.current);
+        mouseMoveListener.current = () => {};
     }
 
     async function handleNewContextSay(userText) {
@@ -136,6 +160,7 @@ export default function Canvas({}) {
                                 onSave={handleSave}
                                 onGrab={handleGrab}
                                 onRelease={handleRelease}
+                                backgroundColor={box.topbarColor}
                             />
                             <p>
                                 <Markdown>
