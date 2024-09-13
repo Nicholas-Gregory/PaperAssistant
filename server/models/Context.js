@@ -20,16 +20,21 @@ const contentItemSchema = new Schema({
     source: imageSourceSchema
 });
 
-const contentSchema = new Schema({
+const contextSchema = new Schema({
     role: {
         required: true,
         type: String
     },
-    content: [contentItemSchema]
-});
-
-const contextSchema = new Schema({
-    contentItems: [contentSchema]
+    content: [contentItemSchema],
+    name: String,
+    children: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Context'
+    }],
+    parent: {
+        type: Schema.Types.ObjectId,
+        ref: 'Context'
+    }
 });
 
 const Context = model('Context', contextSchema);

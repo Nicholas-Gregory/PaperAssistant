@@ -27,7 +27,7 @@ export default function UserProvider({ children }) {
 
         localStorage.setItem(LOCAL_STORAGE_KEY, response.token);
 
-        setUser(response.user || { context: [] });
+        setUser(response.user || { contexts: [] });
 
         return response;
     }

@@ -5,7 +5,7 @@ export default function MessageInputBox({ onSay }) {
     const text = useRef('');
     const messageBoxRef = useRef();
 
-    async function handleMessageButtonClick() {
+    async function handleMessageSubmit() {
         onSay(text.current);
         text.current = '';
     }
@@ -15,19 +15,19 @@ export default function MessageInputBox({ onSay }) {
             if (e.key === 'Enter' && !e.shiftKey && document.activeElement === messageBoxRef.current) {
                 e.preventDefault();
 
-                handleMessageButtonClick();
+                handleMessageSubmit();
             }
         }
 
         window.addEventListener('keydown', listener);
 
         return () => window.removeEventListener('keydown', listener);
-    }, [handleMessageButtonClick]);
+    }, [handleMessageSubmit]);
 
     return (
         <>
             <div
-                className="box"
+                className="card"
                 style={{
                     minHeight: '20px',
                     display: 'flex'
@@ -41,7 +41,7 @@ export default function MessageInputBox({ onSay }) {
                 />
                 &nbsp;
                 <button 
-                    onClick={handleMessageButtonClick}
+                    onClick={handleMessageSubmit}
                     style={{ 
                         flex: 1, 
                         maxHeight: '20px',

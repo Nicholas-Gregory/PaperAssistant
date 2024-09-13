@@ -1,26 +1,27 @@
-export default function ContentBox({ role, content }) {
+import BoxTopbar from "./BoxTopbar";
+
+export default function ContentBox({ 
+    position,
+    scale,
+    backgroundColor,
+    children
+}) {
+
     return (
         <>
-            <div
-                className="box"
+            <span
+                className="card"
                 style={{
-                    backgroundColor: role === 'assistant' ? 'lightseagreen' : 'lightskyblue',
+                    width: `${scale.x}px`,
+                    height: `${scale.y}px`,
+                    position: 'absolute',
+                    top: `${position.y}px`,
+                    left: `${position.x}px`,
+                    backgroundColor,
                 }}
-            >   
-                {Array.isArray(content) ? (
-                    content.map(item => (
-                        item.type === 'text' ? (
-                            <div>
-                                {item.text}
-                            </div>
-                        ) : (
-                            <img />
-                        )
-                    ))
-                ) : (
-                    content
-                )}
-            </div>
+            >
+                {children}
+            </span>
         </>
     )
 }

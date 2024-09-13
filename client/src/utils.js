@@ -21,17 +21,5 @@ export async function claudeApiCall(bodyObject) {
         body
     });
 
-    if (response.ok) {
-        return await response.json();
-    }
-
-    return { 
-        role: 'assistant', 
-        content: [
-            { 
-                type: 'text', 
-                text: 'Lorem ipsum odor amet, consectetuer adipiscing elit. Ante adipiscing ultricies tristique; commodo varius dignissim interdum. Ac lobortis ridiculus tincidunt tristique consectetur maecenas eleifend. Ut condimentum nunc arcu in vehicula libero tortor dapibus vivamus. Enim condimentum facilisis fusce ut sit non quis senectus! Quisque faucibus nisl urna est porta nostra tellus dolor eu. Placerat porttitor sollicitudin integer, justo sollicitudin sociosqu scelerisque. Ac quis enim imperdiet leo, lacinia felis. Id tellus dapibus efficitur commodo faucibus tristique molestie nulla.' 
-            }
-        ] 
-    };
+    return await response.json();
 }

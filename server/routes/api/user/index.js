@@ -6,7 +6,7 @@ const ResourceNotFoundError = require('../../../errors/ResourceNotFoundError.js'
 
 const router = require('express').Router();
 
-const filterPassword = user => Object.fromEntries(Object.entries(user.toObject()).filter(entry => entry[0] !== 'password'))
+const filterPassword = user => Object.fromEntries(Object.entries(user.toObject()).filter(entry => entry[0] !== 'password'));
 
 router.post('/', async (req, res, next) => {
     const userData = req.body;
@@ -41,7 +41,7 @@ router.post('/login', async (req, res, next) => {
 
         return res.status(200).json({
             token: jwt.sign({ userId: user._id }, process.env.JWT_SECRET),
-            user: filterPassword(user)
+            user: filterPassword(await user.populate('contexts'))
         })
     } catch (error) {
         return next(error);
@@ -61,7 +61,7 @@ router.get('/', auth, async (req, res, next) => {
         return next(error);
     }
 
-    return res.status(200).json(filterPassword(user));
+    return res.status(200).json(filterPassword(await user.populate('contexts')));
 });
 
 router.put('/', auth, async (req, res, next) => {
@@ -73,7 +73,7 @@ router.put('/', auth, async (req, res, next) => {
 
         if (!user) throw new ResourceNotFoundError(`User with ID ${userID} not found.`);
 
-        return res.status(201).json(filterPassword(user));
+        return res.status(201).json(filterPassword(await user.populate('contexts')));
     } catch (error) {
         return next(error);
     }
