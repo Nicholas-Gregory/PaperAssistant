@@ -83,10 +83,7 @@ export default function Context({ }) {
                 </button>
             )}
             {context.map(content => (
-                <ContentBox
-                    role={content.role}
-                    content={content.content}
-                />
+                <ContentBox content={content}/>
             ))}
             <MessageInputBox onSay={handleSay}/>
             {error && (
