@@ -1,13 +1,16 @@
 import { Link, Outlet } from 'react-router-dom'
+import TopNav from '../components/TopNav'
+import TopNavLink from '../components/TopNavLink'
 
 export default function AppLayout() {
     return (
         <>
-            App Layout
-            <br />
-            <Link to={'/app/dashboard'}>Dashboard</Link>
-            <Link to='/app/settings'>Settings</Link>
-            <br />
+            <TopNav>
+                App
+                <br /><br />
+                <TopNavLink to={'/app/dashboard'}>Dashboard</TopNavLink>&nbsp; | &nbsp;
+                <TopNavLink to='/app/settings'>Settings</TopNavLink>&nbsp; | &nbsp;
+            </TopNav>
             <Outlet />
         </>
     )

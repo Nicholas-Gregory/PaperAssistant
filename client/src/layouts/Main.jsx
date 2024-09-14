@@ -1,14 +1,17 @@
 import { Link, Outlet } from 'react-router-dom'
+import TopNav from '../components/TopNav'
+import TopNavLink from '../components/TopNavLink'
 
 export default function Main() {
     return (
         <>
-            Main Layout 
-            <br />
-            <Link to={'/home'}>Home</Link>
-            <Link to={'/app'}>App</Link>
-            <Link to={'/user'}>User</Link>
-            <br />
+            <TopNav>
+                PaperAssistant
+                <br /><br />
+                <TopNavLink to={'/home'}>Home</TopNavLink>&nbsp; | &nbsp;
+                <TopNavLink to={'/app'}>App</TopNavLink>&nbsp; | &nbsp;
+                <TopNavLink to={'/user'}>User</TopNavLink>&nbsp; | &nbsp;
+            </TopNav>
             <Outlet />
         </>
     )
