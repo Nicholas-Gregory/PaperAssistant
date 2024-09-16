@@ -1,10 +1,11 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, useOutletContext } from 'react-router-dom'
 import TopNav from '../components/TopNav'
 import TopNavLink from '../components/TopNavLink'
 import { useAuth } from '../contexts/UserContext'
 
 export default function AppLayout() {
     const { user } = useAuth();
+    const { activeDashboard, setActiveDashboard } = useOutletContext();
 
     return (
         <>
@@ -22,7 +23,9 @@ export default function AppLayout() {
                     </>
                 )}
             </TopNav>
-            {user._id && <Outlet />}
+            {user._id && (
+                <Outlet context={{ activeDashboard, setActiveDashboard }}/>
+            )}
         </>
     )
 }

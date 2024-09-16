@@ -17,6 +17,7 @@ import Connections from "./pages/Connections";
 import General from "./pages/General";
 import UserPage from "./pages/UserPage";
 import Auth from "./pages/Auth";
+import UserSettings from "./pages/UserSettings";
 
 
 export default function App() {
@@ -103,6 +104,11 @@ export default function App() {
                             <Route
                                 path="/user/auth"
                                 element={<Auth />}
+                            />
+
+                            <Route
+                                path="/user/settings"
+                                element={<UserSettings />}
                             />
                         </Route>
                     </Route>

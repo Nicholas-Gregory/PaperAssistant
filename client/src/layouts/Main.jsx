@@ -2,10 +2,12 @@ import { useNavigate, Outlet } from 'react-router-dom'
 import TopNav from '../components/TopNav'
 import TopNavLink from '../components/TopNavLink'
 import { useAuth } from '../contexts/UserContext'
+import { useState } from 'react';
 
 export default function Main() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [activeDashboard, setActiveDashboard] = useState(null);
 
     function handleLogoutClick() {
         navigate('/user/auth', { replace: true });
@@ -29,7 +31,7 @@ export default function Main() {
                     </span>
                 )}
             </TopNav>
-            <Outlet />
+            <Outlet context={ { activeDashboard, setActiveDashboard } }/>
         </>
     )
 }
