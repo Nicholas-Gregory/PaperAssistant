@@ -13,6 +13,10 @@ router.get('/:contextId', auth, async (req, res, next) => {
     try {
         const user = await User.findById(userId);
 
+        if (!user) {
+            throw new AuthenticationError(`No user with ID ${userId} found!`)
+        }
+
         if (!user.contexts.some(c => c.toString() === contextId)) {
             throw new ForbiddenResourceError(`User with ID ${userId} does not have permission to view context with ID ${contextId}`);
         }
@@ -33,7 +37,7 @@ router.post('/', auth, async (req, res, next) => {
         const user = await User.findById(userId);
 
         if (!user) {
-            throw new AuthenticationError('Must be logged in to save contexts');
+            throw new AuthenticationError(`No user with ID ${userId} found!`);
         }
 
         const context = await Context.create(contextData);

@@ -1,10 +1,16 @@
-import { Link, Outlet } from 'react-router-dom'
+import { useNavigate, Outlet } from 'react-router-dom'
 import TopNav from '../components/TopNav'
 import TopNavLink from '../components/TopNavLink'
 import { useAuth } from '../contexts/UserContext'
 
 export default function Main() {
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    function handleLogoutClick() {
+        navigate('/user/auth', { replace: true });
+        logout();
+    }
     
     return (
         <>
@@ -17,7 +23,7 @@ export default function Main() {
                 {user._id && (
                     <span style={{ float: 'right' }}>
                         Logged in as {user.username}&nbsp;| &nbsp;
-                        <button onClick={logout}>
+                        <button onClick={handleLogoutClick}>
                             Logout
                         </button>
                     </span>

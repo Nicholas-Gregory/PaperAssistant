@@ -64,6 +64,11 @@ export default function App() {
                                     path="/app/dashboard/:dashboardId"
                                     element={<MyDashboard />}
                                 />
+
+                                <Route
+                                    path="/app/dashboard/new"
+                                    element={<MyDashboard />}
+                                />
                             </Route>
 
                             <Route
