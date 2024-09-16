@@ -3,36 +3,38 @@ import TopNav from '../components/TopNav';
 import { useEffect, useState } from 'react';
 import { apiCall } from '../utils';
 import { useAuth } from '../contexts/UserContext';
-import Dashboard from '../components/Dashboard';
+import DashboardEditor from '../components/DashboardEditor';
+import useData from '../hooks/useData';
+import ServerError from '../components/ServerError';
 
 export default function MyDashboard() {
     let { dashboardId } = useParams();
     const [dashboard, setDashboard] = useState({});
-    const { authorize } = useAuth();
     const setActiveDashboard = useOutletContext();
-    const [error, setError] = useState(null);
+    const { error, loading, data } = useData(`/dashboard/${dashboardId || 'new'}`);
 
     useEffect(() => {
-        if (!dashboardId) return;
-
-        const response = apiCall('GET', `/dashboard/${dashboardId}`, null, authorize());
-
-        if (response.error) {
-            setError(response.type);
-            return;
+        if (!error && !loading && data) {
+            setActiveDashboard(data);
+            setDashboard(data);
         }
-
-        setDashboard(response);
-        setActiveDashboard(dashboardId);
-    }, [dashboardId]);
+    }, [dashboardId, data]);
 
     return (
         <>
             <TopNav>
-                Dashboard: {dashboard.name}
+                {dashboard.name ? (
+                    <>
+                        Dashboard: {dashboard.name}
+                    </>
+                ) : (
+                    'New Dashboard'
+                )}
             </TopNav>
 
-            <Dashboard dashboard={dashboard} />
+            <DashboardEditor dashboard={dashboard} />
+
+            <ServerError error={error} />
         </>
     )
 }
