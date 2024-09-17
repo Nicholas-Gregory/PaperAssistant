@@ -9,7 +9,11 @@ const dashboardSchema = new Schema({
         required: true,
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
+    contexts: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Context'
+    }]
 });
 
 const Dashboard = model('Dashboard', dashboardSchema);

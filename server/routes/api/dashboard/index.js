@@ -13,6 +13,10 @@ router.get('/:dashboardId', auth, async (req, res, next) => {
     const userId = req.userId;
 
     try {
+        if (dashboardId === 'new') {
+            return res.status(204).end();
+        }
+
         const dashboard = await Dashboard.findById(dashboardId);
         const user = await User.findById(userId);
 

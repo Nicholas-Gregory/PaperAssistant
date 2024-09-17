@@ -21,6 +21,9 @@ export default function useData(endpoint) {
                 }
 
                 setError(null);
+
+                if (response.status === 204) return;
+
                 setData(response);
             });
         }
