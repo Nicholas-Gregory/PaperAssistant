@@ -2,12 +2,19 @@ const router = require('express').Router();
 const axios = require('axios');
 const { auth } = require('../../../middleware');
 const ClaudeError = require('../../../errors/ClaudeError');
+const User = require('../../../models/User');
+const AuthenticationError = require('../../../errors/AuthenticationError');
 
 router.post('/', auth, async (req, res, next) => {
     const claudeBody = req.body;
-    console.log(claudeBody)
 
     try {
+        const user = await User.findById(req.userId);
+
+        if (!user) {
+            throw new AuthenticationError('Must be logged in to make LLM requests');
+        }
+
         const response = await axios.post('https://api.anthropic.com/v1/messages', claudeBody, {
             headers: {
                 'x-api-key': process.env.VITE_CLAUDE_API_KEY,
