@@ -62,8 +62,8 @@ router.post('/', auth, async (req, res, next) => {
         }))._id;
 
         const contexts = await Promise.all(await userData.contexts.filter(card => (
-            !card.parent
-        ).map(async card => await resolveTree(card))));
+            !userData.contexts.find(c => c.children.includes(card))
+        )).map(async card => await resolveTree(card)));
 
         const dashboard = await Dashboard.create({
             name: userData.name,

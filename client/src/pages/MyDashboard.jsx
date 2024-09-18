@@ -39,11 +39,16 @@ export default function MyDashboard() {
             name: newDashboardName,
             ownerId: user._id,
             contexts: (
-                editorRef.current.getCards().map(card => ({
+                editorRef.current.getCards()
+                .filter(card => !card.parent)
+                .map(card => ({
                     role: card.role,
                     content: card.content,
-                    children: card.children,
-                    parent: card.parent
+                    children: card.children.map(card => ({
+                        role: card.role,
+                        content: card.content,
+                        children: card.children
+                    }))
                 }))
             )
         }, authorize());
