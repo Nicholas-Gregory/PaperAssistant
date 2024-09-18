@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import Card from "./Card";
 import MessageInput from './MessageInput';
 import { apiCall } from "../utils";
@@ -7,6 +7,12 @@ import { useAuth } from "../contexts/UserContext";
 const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) {
     const [cards, setCards] = useState([]);
     const { authorize } = useAuth();
+
+    useEffect(() => {
+        // Populate cards with the serialized full tree
+        // children and parent fields populated with references
+        
+    }, [dashboard])
 
     useImperativeHandle(ref, () => {
         return {

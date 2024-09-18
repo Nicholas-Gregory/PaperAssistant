@@ -6,6 +6,23 @@ const { auth } = require('../../../middleware')
 const Context = require('../../../models/Context.js');
 const User = require('../../../models/User.js');
 
+router.get('/tree/:contextId', auth, async (req, res, next) => {
+    const rootContextId = req.params.contextId;
+    const userId = req.userId;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            throw new AuthenticationError(`No user with ID ${userId} found!`)
+        }
+
+        
+    } catch (error) {
+        return next(error);
+    }
+})
+
 router.get('/:contextId', auth, async (req, res, next) => {
     const contextId = req.params.contextId;
     const userId = req.userId;

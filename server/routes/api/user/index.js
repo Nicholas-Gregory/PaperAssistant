@@ -41,7 +41,7 @@ router.post('/login', async (req, res, next) => {
 
         return res.status(200).json({
             token: jwt.sign({ userId: user._id }, process.env.JWT_SECRET),
-            user: filterPassword(await user.populate('dashboards'))
+            user: filterPassword(user)
         })
     } catch (error) {
         return next(error);
@@ -61,7 +61,7 @@ router.get('/', auth, async (req, res, next) => {
         return next(error);
     }
 
-    return res.status(200).json(filterPassword(await user.populate('dashboards')));
+    return res.status(200).json(filterPassword(user));
 });
 
 router.put('/', auth, async (req, res, next) => {
@@ -73,7 +73,7 @@ router.put('/', auth, async (req, res, next) => {
 
         if (!user) throw new ResourceNotFoundError(`User with ID ${userID} not found.`);
 
-        return res.status(201).json(filterPassword(await user.populate('dashboards')));
+        return res.status(201).json(filterPassword(user));
     } catch (error) {
         return next(error);
     }

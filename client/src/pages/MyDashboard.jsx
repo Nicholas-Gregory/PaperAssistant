@@ -9,13 +9,13 @@ import ServerError from '../components/ServerError';
 
 export default function MyDashboard() {
     let { dashboardId } = useParams();
-    const [dashboard, setDashboard] = useState({});
+    const [dashboard, setDashboard] = useState();
     const [newDashboardName, setNewDashboardName] = useState('');
     const setActiveDashboard = useOutletContext();
     const { error, loading, data } = useData(`/dashboard/${dashboardId || 'new'}`);
     const saveModalRef = useRef();
     const editorRef = useRef();
-    const { authorize, user } = useAuth();
+    const { authorize, user, setUser } = useAuth();
 
     useEffect(() => {
         if (!error && !loading && data) {
@@ -54,6 +54,10 @@ export default function MyDashboard() {
         }, authorize());
 
         setDashboard(response);
+        setUser({
+            ...user,
+            dashboards: [...user.dashboards, response._id]
+        });
     }
 
     return (
@@ -79,7 +83,7 @@ export default function MyDashboard() {
             </dialog>
             <TopNav>
                 <>
-                    {dashboard.name ? (
+                    {dashboard ? (
                         <>
                             Dashboard: {dashboard.name}
                         </>
