@@ -1,3 +1,5 @@
+import Markdown from 'markdown-to-jsx'
+
 export default function Card({ card }) {
     return (
         <div
@@ -7,10 +9,15 @@ export default function Card({ card }) {
                 height: card.scale.y,
                 position: 'absolute',
                 top: card.position.y,
-                left: card.position.x
+                left: card.position.x,
+                overflowY: 'scroll'
             }}
         >
-            {card.content.map(c => c.text)}
+            {card.content.map(c => (
+                <Markdown>
+                    {c.text}
+                </Markdown>
+            ))}
         </div>
     )
 }

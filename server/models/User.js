@@ -19,10 +19,10 @@ const userSchema = new Schema({
         unique: true,
         match: /^[\w-.!#$&'*+=?^`{}|~/]+@([\w-]+\.)+[\w-]{2,}$/,
     },
-    contexts: {
+    dashboards: {
         type: [{
             type: Schema.Types.ObjectId,
-            ref: 'Context'
+            ref: 'Dashboard'
         }]
     }
 });

@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import Card from "./Card";
 import MessageInput from './MessageInput';
 import { apiCall } from "../utils";
 import { useAuth } from "../contexts/UserContext";
 
-export default function DashboardEditor({ dashboard }) {
+const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) {
     const [cards, setCards] = useState([]);
     const { authorize } = useAuth();
+
+    useImperativeHandle(ref, () => {
+        return {
+            getCards: () => cards
+        }
+    }, [cards]);
 
     function getContentArray(content) {
         return [{ type: 'text', text: content }];
@@ -127,7 +133,8 @@ export default function DashboardEditor({ dashboard }) {
             )}
             {renderContexts()}
             {cards.reduce((array, card, index) => card.children.length === 0 ? (
-                [...array,
+                [
+                    ...array,
                     <MessageInput
                         key={index}
                         width={card.scale.x}
@@ -141,4 +148,6 @@ export default function DashboardEditor({ dashboard }) {
             ) : array, [])}
         </div>
     )
-}
+});
+
+export default DashboardEditor;
