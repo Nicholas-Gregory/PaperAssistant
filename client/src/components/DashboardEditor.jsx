@@ -6,13 +6,38 @@ import { useAuth } from "../contexts/UserContext";
 
 const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) {
     const [cards, setCards] = useState([]);
+    const [cardScaleAndPosition, setCardScaleAndPosition] = useState([]);
     const { authorize } = useAuth();
 
     useEffect(() => {
-        // Populate cards with the serialized full tree
-        // children and parent fields populated with references
-        
-    }, [dashboard])
+        if (dashboard) {
+            // Populate cards with the flattened full tree
+            // Children and parent fields populated with object references
+            function makeReferences(node, parent) {
+                const card = {
+                    role: node.role,
+                    content: node.content,
+                    parent
+                };
+
+                card.children = node.children.map(child => (
+                    makeReferences(child, node)
+                ));
+
+                setCards(cards => [...cards, card]);
+
+                return card;
+            }
+
+            for (let rootContext of dashboard.contexts) {
+                makeReferences(rootContext);
+            }
+        }
+    }, [dashboard]);
+
+    useEffect(() => {
+        setCardScaleAndPosition(initScaleAndPosition(cards));
+    }, [cards]);
 
     useImperativeHandle(ref, () => {
         return {
@@ -42,7 +67,10 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
         while (currentCard) {
             messages.unshift({
                 role: currentCard.role,
-                content: currentCard.content
+                content: currentCard.content.map(content => ({
+                    type: content.type,
+                    text: content.text
+                }))
             });
 
             currentCard = currentCard.parent;
@@ -60,15 +88,17 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
         newUserCard.parent = leafCard;
         newUserCard.children = [newAssistantCard];
 
-        setCards(cards => [...cards, newUserCard, newAssistantCard]);
-        setCards(cards => cards.map(card => (
-            card === leafCard ? (
-                {
-                    ...leafCard,
-                    children: [...leafCard.children, newAssistantCard]
-                }
-            ) : card
-        )));
+        const newCards = [
+            ...cards.toSpliced(-1, 1, {
+                ...leafCard,
+                children: [...leafCard.children, newAssistantCard]
+            }), 
+            newUserCard, 
+            newAssistantCard
+        ];
+
+        setCardScaleAndPosition(initScaleAndPosition(newCards));
+        setCards(newCards);
     }
 
     async function handleNewContextSubmit(content) {
@@ -90,37 +120,58 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
         setCards([...cards, firstUserCard, firstAssistantCard]);
     }
 
-    function renderContexts() {
+    function initScaleAndPosition(cards) {
         const results = [];
         const rootCards = [];
 
+        // Figure out what's a root and init scale for every card
         for (let i = 0; i < cards.length; i++) {
             const card = cards[i];
 
-            if (!card.scale) {
-                card.scale = { x: 400, y: 200 }
-            }
+            if (!card.parent) rootCards.push(card);
+            if (!results[i]) {
+                results[i] = {};
 
-            if (!card.position) {
-                if (card.parent) {
-                    const { x: parentX, y: parentY } = card.parent.position;
-            
-                    card.position = {
-                        x: parentX,
-                        y: parentY + card.parent.scale.y
-                    }
-                } else {
-                    card.position = {
-                        x: rootCards.reduce((positionValue, card) => positionValue + card.position.x + card.scale.x, 0),
-                        y: 0
-                    }
+                if (!results[i].scale) {
+                    results[i].scale = { x: 400, y: 200 }
+                }
+            }
+        }
+
+        // Position everything based on root cards
+        for (let i = 0; i < rootCards.length; i++) {
+            const rootCard = rootCards[i];
+            const getResult = queryCard => results[cards.findIndex(card => card === queryCard)];
+            const rootResult = getResult(rootCard);
+
+            if (!rootResult.position) {
+                rootResult.position = { x: 0, y: 0 };
+
+                for (let j = 0; j < i; j++) {
+                    const previousRootResult = getResult(rootCards[j]);
+                    rootResult.position += previousRootResult.position.x + previousRootResult.scale.x;
                 }
             }
 
-            results.push(<Card key={i} card={card} />);
-        }
+            function positionChildren(node) {
+                for (let i = 0; i < node.children.length; i++) {
+                    const child = node.children[i];
+                    const childResult = getResult(child);
 
-        return results;
+                    if (!childResult.position) {
+                        const parentResult = getResult(node);
+
+                        childResult.position = { x: 0, y: parentResult.position.y + parentResult.scale.y };
+                    }
+
+                    positionChildren(child)
+                }
+            }
+
+            positionChildren(rootCard);
+        }
+     
+        return results
     }
 
     return (
@@ -137,21 +188,32 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                     onSubmit={handleNewContextSubmit}
                 />
             )}
-            {renderContexts()}
-            {cards.reduce((array, card, index) => card.children.length === 0 ? (
-                [
-                    ...array,
-                    <MessageInput
+            {cardScaleAndPosition.length > 0 && (
+                cards.map((card, index) => (
+                    <Card 
                         key={index}
-                        width={card.scale.x}
-                        position={{
-                            x: card.position.x,
-                            y: card.position.y + card.scale.y
-                        }}
-                        onSubmit={content => sayWithContext(card, content)}
+                        card={card}
+                        position={cardScaleAndPosition[index]?.position}
+                        scale={cardScaleAndPosition[index]?.scale} 
                     />
-                ]
-            ) : array, [])}
+                )
+            ))}
+            {cardScaleAndPosition.length > 0 && (
+                cards.reduce((array, card, index) => card.children.length === 0 ? (
+                    [
+                        ...array,
+                        <MessageInput
+                            key={index}
+                            width={cardScaleAndPosition[index]?.scale.x}
+                            position={{
+                                x: cardScaleAndPosition[index]?.position.x,
+                                y: cardScaleAndPosition[index]?.position.y + cardScaleAndPosition[index]?.scale.y
+                            }}
+                            onSubmit={content => sayWithContext(card, content)}
+                        />
+                    ]
+                ) : array, []
+            ))}
         </div>
     )
 });

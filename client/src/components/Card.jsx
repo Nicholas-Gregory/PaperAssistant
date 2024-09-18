@@ -1,15 +1,15 @@
 import Markdown from 'markdown-to-jsx'
 
-export default function Card({ card }) {
+export default function Card({ card, position, scale }) {
     return (
         <div
             className="card"
             style={{
-                width: card.scale.x,
-                height: card.scale.y,
+                width: scale?.x,
+                height: scale?.y,
                 position: 'absolute',
-                top: card.position.y,
-                left: card.position.x,
+                top: position?.y,
+                left: position?.x,
                 overflowY: 'scroll'
             }}
         >
