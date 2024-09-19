@@ -43,7 +43,11 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
     const canvasTop = () => containerDivRef.current.getBoundingClientRect().top;
 
     function handleCanvasClick(e) {
-        setNewContextPosition({ x: e.clientX, y: e.clientY });
+        if (newContextPosition) {
+            setNewContextPosition(null);
+        } else {
+            setNewContextPosition({ x: e.clientX, y: e.clientY });
+        }
     }
 
     async function handleNewCardSubmit(content) {
