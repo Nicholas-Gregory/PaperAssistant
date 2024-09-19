@@ -15,7 +15,7 @@ export default function AppLayout() {
                 {user._id ? (
                     <>
                         <TopNavLink to={'/app/dashboard'}>Dashboard</TopNavLink>&nbsp; | &nbsp;
-                        <TopNavLink to='/app/settings'>Settings</TopNavLink>&nbsp; | &nbsp;
+                        <TopNavLink to='/app/settings'>Settings</TopNavLink>
                     </>
                 ) : (
                     <>

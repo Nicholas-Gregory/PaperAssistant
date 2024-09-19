@@ -34,20 +34,7 @@ router.get('/:dashboardId', auth, async (req, res, next) => {
             throw new ForbiddenResourceError(`User with ID ${userId} does not have permission to edit dashboard with ID ${dashboardId}!`)
         }
 
-        async function populateTree(node) {
-            await node.populate('children');
-
-            await Promise.all(
-                node.children
-                .map(async child => await populateTree(child))
-            );
-        }
-
-        await dashboard.populate('contexts');
-
-        for (let rootContext of dashboard.contexts) {
-            await populateTree(rootContext);
-        }
+        await dashboard.populate('cards');
 
         res.status(200).json(dashboard);
     } catch (error) {

@@ -18,6 +18,7 @@ import General from "./pages/General";
 import UserPage from "./pages/UserPage";
 import Auth from "./pages/Auth";
 import UserSettings from "./pages/UserSettings";
+import Model from "./pages/Model";
 
 
 export default function App() {
@@ -78,7 +79,7 @@ export default function App() {
                             >
                                 <Route
                                     index
-                                    element={<Navigate to={'/app/settings/general'} replace />}
+                                    element={<Navigate to={"/app/settings/general"} replace />}
                                 />
 
                                 <Route
@@ -89,6 +90,11 @@ export default function App() {
                                 <Route
                                     path="/app/settings/general"
                                     element={<General />}
+                                />
+
+                                <Route
+                                    path="/app/settings/model"
+                                    element={<Model />}
                                 />
                             </Route>
                         </Route>

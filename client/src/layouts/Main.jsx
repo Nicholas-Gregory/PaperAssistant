@@ -21,7 +21,7 @@ export default function Main() {
                 <br /><br />
                 <TopNavLink to={'/home'}>Home</TopNavLink>&nbsp; | &nbsp;
                 <TopNavLink to={'/app'}>App</TopNavLink>&nbsp; | &nbsp;
-                <TopNavLink to={'/user'}>User</TopNavLink>&nbsp; | &nbsp;
+                <TopNavLink to={'/user'}>User</TopNavLink>
                 {user._id && (
                     <span style={{ float: 'right' }}>
                         Logged in as {user.username}&nbsp;| &nbsp;
