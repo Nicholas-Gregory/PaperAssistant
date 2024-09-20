@@ -23,103 +23,101 @@ import Model from "./pages/Model";
 
 export default function App() {
     return (
-        <UserProvider>
-            <BrowserRouter>
-                <Routes>
+        <BrowserRouter>
+            <Routes>
+                <Route
+                    path="/"
+                    element={<Main />}
+                >
                     <Route
-                        path="/"
-                        element={<Main />}
+                        index
+                        element={<Navigate to='/home' replace/>}
+                    />
+
+                    <Route
+                        path="/home"
+                        element={<Home />}
+                    />
+
+                    <Route
+                        path='/app'
+                        element={<AppLayout />}
                     >
                         <Route
                             index
-                            element={<Navigate to='/home' replace/>}
+                            element={<Navigate to='/app/dashboard/manage' replace/>}
                         />
-
                         <Route
-                            path="/home"
-                            element={<Home />}
-                        />
-
-                        <Route
-                            path='/app'
-                            element={<AppLayout />}
+                            path="/app/dashboard"
+                            element={<Dashboard />}
                         >
                             <Route
                                 index
-                                element={<Navigate to='/app/dashboard/manage' replace/>}
+                                element={<Navigate to={'/app/dashboard/manage'} replace />}
                             />
-                            <Route
-                                path="/app/dashboard"
-                                element={<Dashboard />}
-                            >
-                                <Route
-                                    index
-                                    element={<Navigate to={'/app/dashboard/manage'} replace />}
-                                />
-
-                                <Route
-                                    path="/app/dashboard/manage"
-                                    element={<Manage />}
-                                />
-
-                                <Route
-                                    path="/app/dashboard/:dashboardId"
-                                    element={<MyDashboard />}
-                                />
-
-                                <Route
-                                    path="/app/dashboard/new"
-                                    element={<MyDashboard />}
-                                />
-                            </Route>
 
                             <Route
-                                path="/app/settings"
-                                element={<Settings />}
-                            >
-                                <Route
-                                    index
-                                    element={<Navigate to={"/app/settings/general"} replace />}
-                                />
+                                path="/app/dashboard/manage"
+                                element={<Manage />}
+                            />
 
-                                <Route
-                                    path="/app/settings/connections"
-                                    element={<Connections />}
-                                />
+                            <Route
+                                path="/app/dashboard/:dashboardId"
+                                element={<MyDashboard />}
+                            />
 
-                                <Route
-                                    path="/app/settings/general"
-                                    element={<General />}
-                                />
-
-                                <Route
-                                    path="/app/settings/model"
-                                    element={<Model />}
-                                />
-                            </Route>
+                            <Route
+                                path="/app/dashboard/new"
+                                element={<MyDashboard />}
+                            />
                         </Route>
+
                         <Route
-                            path="/user"
-                            element={<User />}
+                            path="/app/settings"
+                            element={<Settings />}
                         >
                             <Route
-                                path="/user/:id"
-                                element={<UserPage />}
+                                index
+                                element={<Navigate to={"/app/settings/general"} replace />}
                             />
 
                             <Route
-                                path="/user/auth"
-                                element={<Auth />}
+                                path="/app/settings/connections"
+                                element={<Connections />}
                             />
 
                             <Route
-                                path="/user/settings"
-                                element={<UserSettings />}
+                                path="/app/settings/general"
+                                element={<General />}
+                            />
+
+                            <Route
+                                path="/app/settings/model"
+                                element={<Model />}
                             />
                         </Route>
                     </Route>
-                </Routes>
-            </BrowserRouter>
-        </UserProvider>
+                    <Route
+                        path="/user"
+                        element={<User />}
+                    >
+                        <Route
+                            path="/user/:id"
+                            element={<UserPage />}
+                        />
+
+                        <Route
+                            path="/user/auth"
+                            element={<Auth />}
+                        />
+
+                        <Route
+                            path="/user/settings"
+                            element={<UserSettings />}
+                        />
+                    </Route>
+                </Route>
+            </Routes>
+        </BrowserRouter>
     )
 }

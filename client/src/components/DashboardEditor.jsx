@@ -3,6 +3,7 @@ import Card from "./Card";
 import { apiCall } from "../utils";
 import { useAuth } from "../contexts/UserContext";
 import NewCard from "./NewCard";
+import { useSettings } from "../contexts/SettingsContext";
 
 const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) {
     const [cards, setCards] = useState([]);
@@ -10,6 +11,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
     const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
     const { authorize } = useAuth();
     const containerDivRef = useRef();
+    const [{ model, max_tokens }] = useSettings();
 
     useEffect(() => {
         if (dashboard) {
@@ -58,20 +60,10 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
 
         if (content.type === 'user') {
             const response = await apiCall('POST', '/claude', {
-                model: 'claude-3-5-sonnet-20240620',
-                max_tokens: 2048,
+                model,
+                max_tokens,
                 messages: [content.content]
             }, authorize());
-
-            const newUserContext = {
-                role: content.type,
-                content: content.content
-            };
-            const newClaudeContext = {
-                role: 'assistant',
-                content: response.content
-            };
-
         }
 
         setNewContextPosition(null);

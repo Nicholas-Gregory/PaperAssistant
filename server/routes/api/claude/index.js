@@ -4,6 +4,7 @@ const { auth } = require('../../../middleware');
 const ClaudeError = require('../../../errors/ClaudeError');
 const User = require('../../../models/User');
 const AuthenticationError = require('../../../errors/AuthenticationError');
+const Card = require('../../../models/Card');
 
 router.post('/', auth, async (req, res, next) => {
     const claudeBody = req.body;

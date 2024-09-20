@@ -1,5 +1,6 @@
 import TopNav from "../components/TopNav";
 import TopNavLink from "../components/TopNavLink";
+import { Outlet } from 'react-router-dom';
 
 export default function Settings() {
     return (
@@ -11,6 +12,7 @@ export default function Settings() {
                 <TopNavLink to={'/app/settings/model'}>Model</TopNavLink> &nbsp; | &nbsp;
                 <TopNavLink to={'/app/settings/connections'}>Connections</TopNavLink>
             </TopNav>
+            <Outlet />
         </>
     )
 }
