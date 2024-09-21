@@ -12,26 +12,11 @@ export default function NewCard({
     const [showOptions, setShowOptions] = useState(false);
     const [type, setType] = useState('user');
 
-    function getContentArray(userContent) {
-        // TODO: parse image data
-        return [{ type: 'text', text: userContent }];
-    }
-
     function handleMessageSubmit() {
-        const userText = text.current;
+        const content = text.current;
         text.current = '';
 
-        onSubmit({
-            type,
-            content: type === 'note' || type === 'system' ? (
-                userText
-            ) : (
-                {
-                    role: type,
-                    content: getContentArray(userText)
-                }
-            )
-        });
+        onSubmit({ type, content });
     }
 
     useEffect(() => {

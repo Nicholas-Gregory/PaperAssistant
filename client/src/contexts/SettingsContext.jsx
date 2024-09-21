@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useAuth } from "./UserContext";
+import { apiCall } from "../utils";
 
 const SettingsContext = React.createContext();
 
@@ -12,13 +13,6 @@ export default function SettingsProvider({ children }) {
         model: 'claude-3-5-sonnet-20240620',
         max_tokens: 2048
     });
-    const { user } = useAuth();
-
-    useEffect(() => {
-        if (user._id) {
-            setSettings({ ...settings, ...user.settings });
-        }
-    }, [user]);
 
     return (
         <SettingsContext.Provider value={[settings, setSettings]}>

@@ -53,18 +53,19 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
     }
 
     async function handleNewCardSubmit(content) {
-        if (content.type === 'assistant') {
-            alert('Cannot start a context with an Assistant message');
-            return;
-        }
+        const newUserCard = {
+            ...content,
+            position: {
+                x: newContextPosition.x,
+                y: newContextPosition.y
+            },
+            scale: {
+                x: 400, y: 200
+            }
+        };
+        const newClaudeCard = await apiCall('POST', '/claude', newUserCard, authorize());
 
-        if (content.type === 'user') {
-            const response = await apiCall('POST', '/claude', {
-                model,
-                max_tokens,
-                messages: [content.content]
-            }, authorize());
-        }
+        setCards([...cards, newUserCard, newClaudeCard]);
 
         setNewContextPosition(null);
     }
@@ -87,6 +88,16 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                     onSubmit={handleNewCardSubmit}
                 />
             )}
+            {cards.map(card => (
+                <Card 
+                    content={card.content}
+                    position={{
+                        x: card.position.x,
+                        y: card.position.y - canvasTop()
+                    }}
+                    scale={card.scale}
+                />
+            ))}
             <canvas
                 onClick={handleCanvasClick}
                 width={canvasDimensions.width}

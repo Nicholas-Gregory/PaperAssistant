@@ -12,10 +12,9 @@ const coordinateSchema = new Schema({
 });
 
 const cardSchema = new Schema({
-    content: String,
-    context: {
-        type: Schema.Types.ObjectId,
-        ref: 'Context'
+    content: {
+        type: String,
+        required: true
     },
     position: {
         type: coordinateSchema,
@@ -24,6 +23,19 @@ const cardSchema = new Schema({
     scale: {
         type: coordinateSchema,
         required: true
+    },
+    type: {
+        type: String,
+        required: true
+    },
+    children: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Card',
+        default: () => []
+    }],
+    parent: {
+        type: Schema.Types.ObjectId,
+        ref: 'Card'
     }
 });
 
