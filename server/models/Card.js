@@ -31,7 +31,7 @@ const cardSchema = new Schema({
     children: [{
         type: Schema.Types.ObjectId,
         ref: 'Card',
-        default: () => []
+        default: []
     }],
     parent: {
         type: Schema.Types.ObjectId,

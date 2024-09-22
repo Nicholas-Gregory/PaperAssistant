@@ -42,7 +42,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
         }
     }, [cards]);
 
-    const canvasTop = () => containerDivRef.current.getBoundingClientRect().top;
+    const canvasTop = () => containerDivRef.current.getBoundingClientRect().top + window.scrollY;
 
     function handleCanvasClick(e) {
         if (newContextPosition) {
@@ -52,22 +52,40 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
         }
     }
 
+    function initScale(content) {
+        return { x: 400, y: 200 };
+    }
+
     async function handleNewCardSubmit(content) {
-        const newUserCard = {
+        const newUserCardData = {
             ...content,
             position: {
                 x: newContextPosition.x,
                 y: newContextPosition.y
             },
-            scale: {
-                x: 400, y: 200
-            }
+            scale: initScale(content)
         };
-        const newClaudeCard = await apiCall('POST', '/claude', newUserCard, authorize());
+        const { newClaudeCard, newUserCard } = await apiCall('POST', '/claude', newUserCardData, authorize());
 
         setCards([...cards, newUserCard, newClaudeCard]);
-
         setNewContextPosition(null);
+    }
+
+    async function handleContextCardSubmit(content, parent) {
+        const newUserCardData = {
+            ...content,
+            position: {
+                x: parent.position.x,
+                y: parent.position.y + parent.scale.y
+            },
+            scale: initScale(content),
+            parent: parent._id
+        };
+        const { newClaudeCard, newUserCard } = await apiCall('POST', '/claude', newUserCardData, authorize());
+
+        parent.children = [...parent.children, newUserCard._id];
+
+        setCards([...cards, newUserCard, newClaudeCard]);
     }
 
     return (
@@ -98,6 +116,21 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                     scale={card.scale}
                 />
             ))}
+            {cards.reduce((array, card) => (
+                card.children.length === 0 ? (
+                    [
+                        ...array, 
+                        <NewCard
+                            width={card.scale.x}
+                            position={{
+                                x: card.position.x,
+                                y: card.position.y + card.scale.y - canvasTop()
+                            }}
+                            onSubmit={content => handleContextCardSubmit(content, card)}
+                        />
+                    ]
+                ): array
+            ), [])}
             <canvas
                 onClick={handleCanvasClick}
                 width={canvasDimensions.width}
