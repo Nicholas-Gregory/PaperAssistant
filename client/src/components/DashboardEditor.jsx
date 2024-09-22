@@ -1,219 +1,141 @@
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Card from "./Card";
-import MessageInput from './MessageInput';
 import { apiCall } from "../utils";
 import { useAuth } from "../contexts/UserContext";
+import NewCard from "./NewCard";
+import { useSettings } from "../contexts/SettingsContext";
 
 const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) {
     const [cards, setCards] = useState([]);
-    const [cardScaleAndPosition, setCardScaleAndPosition] = useState([]);
+    const [newContextPosition, setNewContextPosition] = useState(null);
+    const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
     const { authorize } = useAuth();
+    const containerDivRef = useRef();
+    const [{ model, max_tokens }] = useSettings();
 
     useEffect(() => {
         if (dashboard) {
-            // Populate cards with the flattened full tree
-            // Children and parent fields populated with object references
-            function makeReferences(node, parent) {
-                const card = {
-                    role: node.role,
-                    content: node.content,
-                    parent
-                };
-
-                card.children = node.children.map(child => (
-                    makeReferences(child, node)
-                ));
-
-                setCards(cards => [...cards, card]);
-
-                return card;
-            }
-
-            for (let rootContext of dashboard.contexts) {
-                makeReferences(rootContext);
-            }
+            setCards(...dashboard.cards);
         }
     }, [dashboard]);
 
     useEffect(() => {
-        setCardScaleAndPosition(initScaleAndPosition(cards));
-    }, [cards]);
+        if (containerDivRef.current) {
+            setCanvasDimensions({
+                width: window.innerWidth,
+                height: window.innerHeight - canvasTop()
+            });
+        }
+    }, [containerDivRef.current, window.innerWidth, window.innerHeight]);
+
+    useEffect(() => {
+        const listener = e => e.key === 'Escape' && setNewContextPosition(null);
+
+        window.addEventListener('keydown', listener);
+
+        return () => window.removeEventListener('keydown', listener);
+    }, [])
 
     useImperativeHandle(ref, () => {
         return {
-            getCards: () => cards
+            getCards: () => [cards, setCards]
         }
     }, [cards]);
 
-    function getContentArray(content) {
-        return [{ type: 'text', text: content }];
-    }
+    const canvasTop = () => containerDivRef.current.getBoundingClientRect().top + window.scrollY;
 
-    async function getClaudeResponse(messages) {
-        const response = await apiCall('POST', '/claude', {
-            model: 'claude-3-5-sonnet-20240620',
-            max_tokens: 2048,
-            messages
-        }, authorize());
-
-        return response;
-    }
-
-    async function sayWithContext(leafCard, content) {
-        const newUserCard = { role: 'user', content: getContentArray(content) }
-        const messages = [newUserCard];
-        let currentCard = leafCard;
-
-        while (currentCard) {
-            messages.unshift({
-                role: currentCard.role,
-                content: currentCard.content.map(content => ({
-                    type: content.type,
-                    text: content.text
-                }))
-            });
-
-            currentCard = currentCard.parent;
+    function handleCanvasClick(e) {
+        if (newContextPosition) {
+            setNewContextPosition(null);
+        } else {
+            setNewContextPosition({ x: e.clientX, y: e.clientY });
         }
-
-        const response = await getClaudeResponse(messages);
-
-        const newAssistantCard = {
-            role: 'assistant',
-            content: response.content,
-            parent: newUserCard,
-            children: []
-        }
-
-        newUserCard.parent = leafCard;
-        newUserCard.children = [newAssistantCard];
-
-        const newCards = [
-            ...cards.toSpliced(-1, 1, {
-                ...leafCard,
-                children: [...leafCard.children, newAssistantCard]
-            }), 
-            newUserCard, 
-            newAssistantCard
-        ];
-
-        setCardScaleAndPosition(initScaleAndPosition(newCards));
-        setCards(newCards);
     }
 
-    async function handleNewContextSubmit(content) {
-        const contentArray = getContentArray(content);
-        const response = await getClaudeResponse([{ role: 'user', content: contentArray }]);
+    function initScale(content) {
+        return { x: 400, y: 200 };
+    }
 
-        const firstAssistantCard = { 
-            role: 'assistant', 
-            content: response.content,
-            children: []
+    async function handleNewCardSubmit(content) {
+        const newUserCardData = {
+            ...content,
+            position: {
+                x: newContextPosition.x,
+                y: newContextPosition.y
+            },
+            scale: initScale(content)
         };
-        const firstUserCard = { 
-            role: 'user', 
-            content: contentArray
-        };
-        firstAssistantCard.parent = firstUserCard;
-        firstUserCard.children = [firstAssistantCard];
+        const { newClaudeCard, newUserCard } = await apiCall('POST', '/claude', newUserCardData, authorize());
 
-        setCards([...cards, firstUserCard, firstAssistantCard]);
+        setCards([...cards, newUserCard, newClaudeCard]);
+        setNewContextPosition(null);
     }
 
-    function initScaleAndPosition(cards) {
-        const results = [];
-        const rootCards = [];
+    async function handleContextCardSubmit(content, parent) {
+        const newUserCardData = {
+            ...content,
+            position: {
+                x: parent.position.x,
+                y: parent.position.y + parent.scale.y
+            },
+            scale: initScale(content),
+            parent: parent._id
+        };
+        const { newClaudeCard, newUserCard } = await apiCall('POST', '/claude', newUserCardData, authorize());
 
-        // Figure out what's a root and init scale for every card
-        for (let i = 0; i < cards.length; i++) {
-            const card = cards[i];
+        parent.children = [...parent.children, newUserCard._id];
 
-            if (!card.parent) rootCards.push(card);
-            if (!results[i]) {
-                results[i] = {};
-
-                if (!results[i].scale) {
-                    results[i].scale = { x: 400, y: 200 }
-                }
-            }
-        }
-
-        // Position everything based on root cards
-        for (let i = 0; i < rootCards.length; i++) {
-            const rootCard = rootCards[i];
-            const getResult = queryCard => results[cards.findIndex(card => card === queryCard)];
-            const rootResult = getResult(rootCard);
-
-            if (!rootResult.position) {
-                rootResult.position = { x: 0, y: 0 };
-
-                for (let j = 0; j < i; j++) {
-                    const previousRootResult = getResult(rootCards[j]);
-                    rootResult.position += previousRootResult.position.x + previousRootResult.scale.x;
-                }
-            }
-
-            function positionChildren(node) {
-                for (let i = 0; i < node.children.length; i++) {
-                    const child = node.children[i];
-                    const childResult = getResult(child);
-
-                    if (!childResult.position) {
-                        const parentResult = getResult(node);
-
-                        childResult.position = { x: 0, y: parentResult.position.y + parentResult.scale.y };
-                    }
-
-                    positionChildren(child)
-                }
-            }
-
-            positionChildren(rootCard);
-        }
-     
-        return results
+        setCards([...cards, newUserCard, newClaudeCard]);
     }
 
     return (
         <div 
+            ref={containerDivRef}
             style={{ 
                 margin: '5px',
                 position: 'relative'
             }}
         >
-            {cards.length === 0 && (
-                <MessageInput 
-                    width={'50%'}
-                    position={{ x: 0, y: 0 }}
-                    onSubmit={handleNewContextSubmit}
+            {newContextPosition && (
+                <NewCard 
+                    width={400}
+                    position={{
+                        x: newContextPosition.x,
+                        y: newContextPosition.y - canvasTop()
+                    }}
+                    onSubmit={handleNewCardSubmit}
                 />
             )}
-            {cardScaleAndPosition.length > 0 && (
-                cards.map((card, index) => (
-                    <Card 
-                        key={index}
-                        card={card}
-                        position={cardScaleAndPosition[index]?.position}
-                        scale={cardScaleAndPosition[index]?.scale} 
-                    />
-                )
+            {cards.map(card => (
+                <Card 
+                    content={card.content}
+                    position={{
+                        x: card.position.x,
+                        y: card.position.y - canvasTop()
+                    }}
+                    scale={card.scale}
+                />
             ))}
-            {cardScaleAndPosition.length > 0 && (
-                cards.reduce((array, card, index) => card.children.length === 0 ? (
+            {cards.reduce((array, card) => (
+                card.children.length === 0 ? (
                     [
-                        ...array,
-                        <MessageInput
-                            key={index}
-                            width={cardScaleAndPosition[index]?.scale.x}
+                        ...array, 
+                        <NewCard
+                            width={card.scale.x}
                             position={{
-                                x: cardScaleAndPosition[index]?.position.x,
-                                y: cardScaleAndPosition[index]?.position.y + cardScaleAndPosition[index]?.scale.y
+                                x: card.position.x,
+                                y: card.position.y + card.scale.y - canvasTop()
                             }}
-                            onSubmit={content => sayWithContext(card, content)}
+                            onSubmit={content => handleContextCardSubmit(content, card)}
                         />
                     ]
-                ) : array, []
-            ))}
+                ): array
+            ), [])}
+            <canvas
+                onClick={handleCanvasClick}
+                width={canvasDimensions.width}
+                height={canvasDimensions.height}
+            ></canvas>
         </div>
     )
 });

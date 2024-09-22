@@ -24,6 +24,10 @@ export default function MyDashboard() {
         }
     }, [dashboardId, data]);
 
+    async function saveCardsIfNew() {
+        const [cards, setCards] = editorRef.current.getCards();
+    }
+
     async function handleSaveButtonClick() {
         if (dashboardId) {
             //Existing dashboard, PUT to /dashboard/:dashboardId
@@ -39,7 +43,7 @@ export default function MyDashboard() {
             name: newDashboardName,
             ownerId: user._id,
             contexts: (
-                editorRef.current.getCards()
+                editorRef.current.getCards()[0]
                 .filter(card => !card.parent)
                 .map(card => ({
                     role: card.role,

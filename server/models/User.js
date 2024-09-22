@@ -1,6 +1,17 @@
 const { model, Schema } = require('mongoose');
 const bcrypt = require('bcrypt');
 
+const settingsSchema = new Schema({
+    model: {
+        type: String,
+        default: 'claude-3-5-sonnet-20240620'
+    },
+    max_tokens: {
+        type: Number,
+        default: 2048
+    }
+});
+
 const userSchema = new Schema({
     username: {
         type: String,
@@ -24,6 +35,10 @@ const userSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Dashboard'
         }]
+    },
+    settings: {
+        type: settingsSchema,
+        default: () => ({})
     }
 });
 

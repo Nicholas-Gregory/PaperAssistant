@@ -10,9 +10,9 @@ const dashboardSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    contexts: [{
+    cards: [{
         type: Schema.Types.ObjectId,
-        ref: 'Context'
+        ref: 'Card'
     }]
 });
 
