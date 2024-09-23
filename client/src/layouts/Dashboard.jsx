@@ -1,9 +1,10 @@
 import { useOutletContext, Outlet } from 'react-router-dom'
 import TopNav from '../components/TopNav'
 import TopNavLink from '../components/TopNavLink'
+import { Fragment } from 'react';
 
 export default function Dashboard() {
-    const { activeDashboard, setActiveDashboard } = useOutletContext();
+    const { activeDashboards, setActiveDashboards } = useOutletContext();
     
     return (
         <>
@@ -12,13 +13,16 @@ export default function Dashboard() {
                 <br /><br />
                 <TopNavLink to={'/app/dashboard/manage'}>Manage</TopNavLink>&nbsp; | &nbsp;
                 <TopNavLink to={'/app/dashboard/new'}>New</TopNavLink>
-                {activeDashboard && (
-                    <>
-                        &nbsp; | &nbsp;<TopNavLink to={`/app/dashboard/${activeDashboard}`}>Dashboard</TopNavLink>
-                    </>
-                )}
+                {activeDashboards.map((dashboard, index) => (
+                    <Fragment key={index}>
+                        <>
+                            &nbsp; | &nbsp;
+                        </>
+                        <TopNavLink to={`/app/dashboard/${dashboard._id}`}>{dashboard.name}</TopNavLink>
+                    </Fragment>
+                ))}
             </TopNav>
-            <Outlet context={ setActiveDashboard } />
+            <Outlet context={{ activeDashboards, setActiveDashboards }} />
         </>
     )
 }

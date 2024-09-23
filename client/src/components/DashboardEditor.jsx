@@ -11,11 +11,12 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
     const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
     const { authorize } = useAuth();
     const containerDivRef = useRef();
-    const [{ model, max_tokens }] = useSettings();
 
     useEffect(() => {
         if (dashboard) {
-            setCards(...dashboard.cards);
+            setCards([...dashboard.cards]);
+        } else {
+            setCards([]);
         }
     }, [dashboard]);
 
