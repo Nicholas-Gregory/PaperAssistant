@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/UserContext'
 
 export default function AppLayout() {
     const { user } = useAuth();
-    const { activeDashboard, setActiveDashboard } = useOutletContext();
+    const { activeDashboards, setActiveDashboards } = useOutletContext();
 
     return (
         <>
@@ -24,7 +24,7 @@ export default function AppLayout() {
                 )}
             </TopNav>
             {user._id && (
-                <Outlet context={{ activeDashboard, setActiveDashboard }}/>
+                <Outlet context={{ activeDashboards, setActiveDashboards }}/>
             )}
         </>
     )

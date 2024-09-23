@@ -7,7 +7,7 @@ import { useState } from 'react';
 export default function Main() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const [activeDashboard, setActiveDashboard] = useState(null);
+    const [activeDashboards, setActiveDashboards] = useState([]);
 
     function handleLogoutClick() {
         navigate('/user/auth', { replace: true });
@@ -31,7 +31,7 @@ export default function Main() {
                     </span>
                 )}
             </TopNav>
-            <Outlet context={ { activeDashboard, setActiveDashboard } }/>
+            <Outlet context={ { activeDashboards, setActiveDashboards } }/>
         </>
     )
 }

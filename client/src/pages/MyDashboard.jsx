@@ -1,4 +1,4 @@
-import { useParams, useOutletContext } from 'react-router-dom'
+import { useParams, useOutletContext, useNavigate } from 'react-router-dom'
 import TopNav from '../components/TopNav';
 import { useEffect, useRef, useState } from 'react';
 import { apiCall } from '../utils';
@@ -11,22 +11,26 @@ export default function MyDashboard() {
     let { dashboardId } = useParams();
     const [dashboard, setDashboard] = useState();
     const [newDashboardName, setNewDashboardName] = useState('');
-    const setActiveDashboard = useOutletContext();
+    const { activeDashboards, setActiveDashboards } = useOutletContext();
     const { error, loading, data } = useData(`/dashboard/${dashboardId || 'new'}`);
     const saveModalRef = useRef();
     const editorRef = useRef();
     const { authorize, user, setUser } = useAuth();
+    const navigate = useNavigate();
+
+    const setDashboardsList = dashboard => !activeDashboards.some(d => d._id === dashboard._id) && (
+        setActiveDashboards([...activeDashboards, dashboard])
+    );
 
     useEffect(() => {
         if (!error && !loading && data) {
-            setActiveDashboard(data);
             setDashboard(data);
+            setDashboardsList(data);
+        }
+        if (!dashboardId) {
+            setDashboard(null);
         }
     }, [dashboardId, data]);
-
-    async function saveCardsIfNew() {
-        const [cards, setCards] = editorRef.current.getCards();
-    }
 
     async function handleSaveButtonClick() {
         if (dashboardId) {
@@ -42,26 +46,15 @@ export default function MyDashboard() {
         const response = await apiCall('POST', '/dashboard', {
             name: newDashboardName,
             ownerId: user._id,
-            contexts: (
-                editorRef.current.getCards()[0]
-                .filter(card => !card.parent)
-                .map(card => ({
-                    role: card.role,
-                    content: card.content,
-                    children: card.children.map(card => ({
-                        role: card.role,
-                        content: card.content,
-                        children: card.children
-                    }))
-                }))
-            )
+            cards: editorRef.current.getCards()[0]
         }, authorize());
 
-        setDashboard(response);
         setUser({
             ...user,
             dashboards: [...user.dashboards, response._id]
         });
+        setDashboardsList(response);
+        navigate(`/app/dashboard/${response._id}`);
     }
 
     return (
@@ -82,7 +75,7 @@ export default function MyDashboard() {
                         value={newDashboardName}
                         onChange={e => setNewDashboardName(e.target.value)}
                     />
-                    <button disabled={!newDashboardName.length > 0}>Submit</button>
+                    &nbsp;<button disabled={!newDashboardName.length > 0}>Submit</button>
                 </form>
             </dialog>
             <TopNav>
