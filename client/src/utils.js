@@ -14,3 +14,15 @@ export async function apiCall(method, endpoint, body, token) {
 
     return response;
 }
+
+export function getBackgroundColor(type) {
+    if (type === 'user') {
+        return 'aqua'
+    } else if (type === 'assistant') {
+        return 'aquamarine'
+    } else if (type === 'system') {
+        return 'cadetblue'
+    } else if (type === 'note') {
+        return 'azure'
+    }
+}

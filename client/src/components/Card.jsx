@@ -1,6 +1,14 @@
 import Markdown from 'markdown-to-jsx'
+import { getBackgroundColor } from '../utils'
 
-export default function Card({ content, position, scale }) {
+export default function Card({ 
+    content, 
+    position, 
+    scale, 
+    type 
+}) {
+
+
     return (
         <div
             className="card"
@@ -10,7 +18,8 @@ export default function Card({ content, position, scale }) {
                 position: 'absolute',
                 top: position.y,
                 left: position.x,
-                overflowY: 'scroll'
+                overflowY: 'scroll',
+                backgroundColor: getBackgroundColor(type)
             }}
         >
             <Markdown>

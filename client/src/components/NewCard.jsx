@@ -1,5 +1,6 @@
 import ContentEditable from 'react-contenteditable';
 import { useEffect, useRef, useState } from 'react';
+import { getBackgroundColor } from '../utils';
 
 export default function NewCard({ 
     width,
@@ -44,18 +45,6 @@ export default function NewCard({
         }
     }
 
-    function getBackgroundColor() {
-        if (type === 'user') {
-            return 'aqua'
-        } else if (type === 'assistant') {
-            return 'aquamarine'
-        } else if (type === 'system') {
-            return 'cadetblue'
-        } else if (type === 'note') {
-            return 'azure'
-        }
-    }
-
     return (
         <>
             <div
@@ -68,7 +57,7 @@ export default function NewCard({
                     position: 'absolute',
                     top: position.y,
                     left: position.x,
-                    backgroundColor: getBackgroundColor()
+                    backgroundColor: getBackgroundColor(type)
                 }}
             >
                 <ContentEditable

@@ -115,6 +115,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                         y: card.position.y - canvasTop()
                     }}
                     scale={card.scale}
+                    type={card.type}
                 />
             ))}
             {cards.reduce((array, card) => (
