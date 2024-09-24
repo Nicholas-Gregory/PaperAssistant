@@ -20,7 +20,10 @@ router.post('/', auth, async (req, res, next) => {
             throw new AuthenticationError('Must be logged in to make LLM requests');
         }
 
-        const newUserCard = await Card.create(userData);
+        const newUserCard = await Card.create({
+            ...userData,
+            ownerId: user._id
+        });
         let claudeBody = {
             model: user.settings.model,
             max_tokens: user.settings.max_tokens
@@ -65,7 +68,8 @@ router.post('/', auth, async (req, res, next) => {
                 y: 200
             },
             type: 'assistant',
-            parent: newUserCard._id
+            parent: newUserCard._id,
+            ownerId: user._id
         });
 
         newUserCard.children.push(newClaudeCard._id);

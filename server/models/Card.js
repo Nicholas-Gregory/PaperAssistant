@@ -36,7 +36,12 @@ const cardSchema = new Schema({
     parent: {
         type: Schema.Types.ObjectId,
         ref: 'Card'
-    }
+    },
+    ownerId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    name: String
 });
 
 const Card = model('Card', cardSchema);

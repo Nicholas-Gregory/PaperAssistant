@@ -4,13 +4,30 @@ import { apiCall } from "../utils";
 import { useAuth } from "../contexts/UserContext";
 import NewCard from "./NewCard";
 import { useSettings } from "../contexts/SettingsContext";
+import Topbar from "./Topbar";
+import OptionsMenu from "./OptionsMenu";
+import OptionsMenuButton from "./OptionsMenuButton";
+import Markdown from 'markdown-to-jsx';
+import ServerError from './ServerError';
 
 const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) {
     const [cards, setCards] = useState([]);
     const [newContextPosition, setNewContextPosition] = useState(null);
     const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
+    const [showOptions, setShowOptions] = useState({});
+    const [namingCard, setNamingCard] = useState({});
+    const [error, setError] = useState(null);
     const { authorize } = useAuth();
     const containerDivRef = useRef();
+
+    useEffect(() => {
+        for (let card of cards) {
+            setShowOptions(showOptions => ({
+                ...showOptions,
+                [card._id]: false
+            }));
+        }
+    }, [cards]);
 
     useEffect(() => {
         if (dashboard) {
@@ -89,56 +106,180 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
         setCards([...cards, newUserCard, newClaudeCard]);
     }
 
+    function handleOptionsClick(cardId) {
+        setShowOptions({
+            ...showOptions,
+            [cardId]: !showOptions[cardId]
+        });
+    }
+
+    function handleGrab(cardId) {
+
+    }
+
+    function handleRelease(cardId) {
+
+    }
+
+    function handleOptionClick(cardId, optionId) {
+        const card = cards.find(card => card._id === cardId);
+
+        if (optionId === 'name') {
+            setShowOptions({
+                ...showOptions,
+                [cardId]: false
+            });
+            setNamingCard({
+                ...namingCard,
+                [cardId]: card.name || ''
+            });
+        }
+    }
+
+    async function handleNameSaveClick(cardId) {
+        const response = await apiCall('PUT', `/card/${cardId}`, {
+            name: namingCard[cardId]
+        }, authorize());
+
+        if (response.error) {
+            setError(response.type);
+            return;
+        }
+
+        setCards(cards.map(card => (
+            card._id === cardId ? (
+                response
+            ): card
+        )));
+        setNamingCard({
+            ...namingCard,
+            [cardId]: false
+        });
+    }
+
     return (
-        <div 
-            ref={containerDivRef}
-            style={{ 
-                margin: '5px',
-                position: 'relative'
-            }}
-        >
-            {newContextPosition && (
-                <NewCard 
-                    width={400}
-                    position={{
-                        x: newContextPosition.x,
-                        y: newContextPosition.y - canvasTop()
-                    }}
-                    onSubmit={handleNewCardSubmit}
-                />
-            )}
-            {cards.map(card => (
-                <Card 
-                    content={card.content}
-                    position={{
-                        x: card.position.x,
-                        y: card.position.y - canvasTop()
-                    }}
-                    scale={card.scale}
-                    type={card.type}
-                />
-            ))}
-            {cards.reduce((array, card) => (
-                card.children.length === 0 ? (
-                    [
-                        ...array, 
-                        <NewCard
-                            width={card.scale.x}
+        <>
+            <ServerError 
+                error={error}
+                messageMap={{
+                    AuthenticationError: "Must be logged in!"
+                }}
+            />
+            <div 
+                ref={containerDivRef}
+                style={{ 
+                    margin: '5px',
+                    position: 'relative'
+                }}
+            >
+                {newContextPosition && (
+                    <NewCard 
+                        width={400}
+                        position={{
+                            x: newContextPosition.x,
+                            y: newContextPosition.y - canvasTop()
+                        }}
+                        onSubmit={handleNewCardSubmit}
+                    />
+                )}
+                {cards.map(card => (
+                    <>
+                        <Card 
                             position={{
                                 x: card.position.x,
-                                y: card.position.y + card.scale.y - canvasTop()
+                                y: card.position.y - canvasTop()
                             }}
-                            onSubmit={content => handleContextCardSubmit(content, card)}
-                        />
-                    ]
-                ): array
-            ), [])}
-            <canvas
-                onClick={handleCanvasClick}
-                width={canvasDimensions.width}
-                height={canvasDimensions.height}
-            ></canvas>
-        </div>
+                            scale={card.scale}
+                            type={card.type}
+                        >
+                            <Topbar
+                                onGrab={() => handleGrab(card._id)} 
+                                onRelease={() => handleRelease(card._id)}
+                                onOptionsClick={() => handleOptionsClick(card._id)}
+                            >
+                                &nbsp; {namingCard[card._id] || namingCard[card._id] === '' ? (
+                                    <>
+                                        <input
+                                            type="text"
+                                            value={namingCard[card._id]}
+                                            onChange={e => setNamingCard({
+                                                ...namingCard,
+                                                [card._id]: e.target.value
+                                            })}
+                                        />
+                                        &nbsp;
+                                        <button 
+                                            onClick={() => handleNameSaveClick(card._id)}
+                                            onMouseDown={e => e.stopPropagation()}
+                                        >
+                                            Save Name
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        {card.name}
+                                    </>
+                                )}
+                            </Topbar>
+                            <div 
+                                style={{ 
+                                    overflowY: 'auto', 
+                                    height: card.scale.y - 50
+                                }}
+                            >
+                                <Markdown>
+                                    {card.content}
+                                </Markdown>
+                            </div>
+                        </Card>
+                        <OptionsMenu
+                            showOptions={showOptions[card._id]}
+                            position={{
+                                x: card.position.x + card.scale.x + 13,
+                                y: card.position.y - canvasTop()
+                            }}
+                            onClick={id => handleOptionClick(card._id, id)}
+                        >
+                            <OptionsMenuButton id={'edit'}>
+                                <div className='clickable card'>
+                                    Edit
+                                </div>
+                            </OptionsMenuButton>
+                            <OptionsMenuButton id={'branch'}>
+                                <div className='clickable card'>
+                                    Branch
+                                </div>
+                            </OptionsMenuButton>
+                            <OptionsMenuButton id={'name'}>
+                                <div className='clickable card'>
+                                    Name
+                                </div>
+                            </OptionsMenuButton>
+                        </OptionsMenu>
+                    </>
+                ))}
+                {cards.reduce((array, card) => (
+                    card.children.length === 0 ? (
+                        [
+                            ...array, 
+                            <NewCard
+                                width={card.scale.x}
+                                position={{
+                                    x: card.position.x,
+                                    y: card.position.y + card.scale.y - canvasTop()
+                                }}
+                                onSubmit={content => handleContextCardSubmit(content, card)}
+                            />
+                        ]
+                    ): array
+                ), [])}
+                <canvas
+                    onClick={handleCanvasClick}
+                    width={canvasDimensions.width}
+                    height={canvasDimensions.height}
+                ></canvas>
+            </div>
+        </>
     )
 });
 

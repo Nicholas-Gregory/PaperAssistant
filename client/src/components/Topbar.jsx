@@ -2,10 +2,10 @@ import { useState } from "react";
 
 export default function Topbar({
     id,
-    name,
     onGrab,
     onRelease,
-    onOptionsClick
+    onOptionsClick,
+    children
 }) {
     const [backgroundColor, setBackgroundColor] = useState('dimgray');
     const [showOptions, setShowOptions] = useState(false);
@@ -32,7 +32,7 @@ export default function Topbar({
             }}
         >
             <span>✥</span>
-            {name}
+            {children}
             <button 
                 onMouseDown={e => e.stopPropagation()}
                 onClick={onOptionsClick}
