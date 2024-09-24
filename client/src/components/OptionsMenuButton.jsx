@@ -1,12 +1,15 @@
 import { useOptionsContext } from "./OptionsMenu";
 
 export default function OptionsMenuButton({ id, children }) {
-    const onClick = useOptionsContext();
+    const { showOptions, onClick } = useOptionsContext();
 
     return (
         <div 
             onClick={() => onClick(id)}
-            style={{ cursor: 'pointer' }}
+            style={{ 
+                display: showOptions ? 'block' : 'none',
+                cursor: 'pointer' 
+            }}
         >
             {children}
         </div>

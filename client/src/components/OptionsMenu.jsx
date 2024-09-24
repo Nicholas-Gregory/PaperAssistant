@@ -13,7 +13,7 @@ export default function OptionsMenu({
     children
 }) {
     return (
-        <OptionsMenuContext.Provider value={onClick}>
+        <OptionsMenuContext.Provider value={{ showOptions, onClick }}>
             <div
                 className="card"
                 style={{

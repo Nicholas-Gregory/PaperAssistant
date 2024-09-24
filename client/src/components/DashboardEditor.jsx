@@ -16,6 +16,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
     const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
     const [showOptions, setShowOptions] = useState({});
     const [namingCard, setNamingCard] = useState({});
+    const [branching, setBranching] = useState([]);
     const [error, setError] = useState(null);
     const { authorize } = useAuth();
     const containerDivRef = useRef();
@@ -133,6 +134,12 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                 ...namingCard,
                 [cardId]: card.name || ''
             });
+        } else if (optionId === 'branch') {
+            setShowOptions({
+                ...showOptions,
+                [cardId]: false
+            });
+            !branching.includes(cardId) && setBranching([...branching, cardId]);
         }
     }
 
@@ -155,6 +162,15 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
             ...namingCard,
             [cardId]: false
         });
+    }
+
+    async function handleBranchSubmit(content, card) {
+        const newUserCardData = {
+            ...content,
+            position: {
+                
+            }
+        }
     }
 
     return (
@@ -182,6 +198,20 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                         onSubmit={handleNewCardSubmit}
                     />
                 )}
+                {branching.map(cardId => {
+                    const card = cards.find(card => card._id === cardId);
+
+                    return (
+                        <NewCard
+                            width={card.scale.x}
+                            position={{
+                                x: card.position.x + card.scale.x + 15,
+                                y: card.position.y + card.scale.y - canvasTop()
+                            }}
+                            onSubmit={content => handleBranchSubmit(content, card)}
+                        />
+                    )
+                })}
                 {cards.map(card => (
                     <>
                         <Card 
@@ -253,6 +283,11 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                             <OptionsMenuButton id={'name'}>
                                 <div className='clickable card'>
                                     Name
+                                </div>
+                            </OptionsMenuButton>
+                            <OptionsMenuButton id={'delete'}>
+                                <div className="clickable card">
+                                    Delete
                                 </div>
                             </OptionsMenuButton>
                         </OptionsMenu>
