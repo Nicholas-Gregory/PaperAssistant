@@ -58,7 +58,7 @@ router.post('/', auth, async (req, res, next) => {
             content: getContentString(data.content),
             position: {
                 x: newUserCard.position.x,
-                y: newUserCard.position.y + newUserCard.scale.y
+                y: newUserCard.position.y + newUserCard.scale.y + 10
             },
             scale: {
                 x: 400,
@@ -70,6 +70,13 @@ router.post('/', auth, async (req, res, next) => {
 
         newUserCard.children.push(newClaudeCard._id);
         await newUserCard.save();
+
+        if (newUserCard.parent) {
+            const parentCard = await Card.findById(newUserCard.parent);
+
+            parentCard.children.push(newUserCard._id);
+            await parentCard.save();
+        }
 
         return res.status(200).json({ newClaudeCard, newUserCard });
     } catch (error) {

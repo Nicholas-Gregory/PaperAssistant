@@ -64,4 +64,35 @@ router.post('/', auth, async (req, res, next) => {
     }
 });
 
+router.put('/:dashboardId', auth, async (req, res, next) => {
+    const userId = req.userId;
+    const newDashboardData = req.body;
+    const dashboardId = req.params.dashboardId;
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            throw new AuthenticationError(`No user with ID ${userId} exists!`);
+        }
+
+        if (!user.dashboards.some(id => id.toString() === dashboardId)) {
+            throw new ForbiddenResourceError(`User with ID ${userId} does not own dashboard with ID ${dashboardId}`);
+        }
+
+        const dashboard = await Dashboard.findByIdAndUpdate(dashboardId, newDashboardData, { 
+            runValidators: true,
+            returnDocument: 'after'
+        });
+
+        if (!dashboard) {
+            throw new ResourceNotFoundError(`No dashboard with ID ${dashboardId} exists!`);
+        }
+
+        return res.status(200).json(await dashboard.populate('cards'));
+    } catch (error) {
+
+    }
+});
+
 module.exports = router;

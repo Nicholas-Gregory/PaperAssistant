@@ -77,7 +77,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
             ...content,
             position: {
                 x: parent.position.x,
-                y: parent.position.y + parent.scale.y
+                y: parent.position.y + parent.scale.y + 10
             },
             scale: initScale(content),
             parent: parent._id

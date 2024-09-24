@@ -18,43 +18,45 @@ export default function MyDashboard() {
     const { authorize, user, setUser } = useAuth();
     const navigate = useNavigate();
 
-    const setDashboardsList = dashboard => !activeDashboards.some(d => d._id === dashboard._id) && (
+    const addToActiveDashboards = dashboard => !activeDashboards.some(d => d._id === dashboard._id) && (
         setActiveDashboards([...activeDashboards, dashboard])
     );
 
     useEffect(() => {
         if (!error && !loading && data) {
             setDashboard(data);
-            setDashboardsList(data);
+            addToActiveDashboards(data);
         }
         if (!dashboardId) {
             setDashboard(null);
         }
     }, [dashboardId, data]);
 
-    async function handleSaveButtonClick() {
-        if (dashboardId) {
-            //Existing dashboard, PUT to /dashboard/:dashboardId
-
-        } else {
-            //New dashboard, POST to /dashboard
-            saveModalRef.current.showModal()
-        }
-    }
-
     async function handleNameNewDashboardSubmit() {
-        const response = await apiCall('POST', '/dashboard', {
-            name: newDashboardName,
-            ownerId: user._id,
-            cards: editorRef.current.getCards()[0]
-        }, authorize());
+        let response;
+        if (dashboardId) {
+            response = await apiCall('PUT', `/dashboard/${dashboardId}`, {
+                ...dashboard,
+                name: newDashboardName,
+                cards: editorRef.current.getCards()[0].map(card => card._id)
+            }, authorize());
+
+            setDashboard(response);
+        } else {
+            response = await apiCall('POST', '/dashboard', {
+                name: newDashboardName,
+                ownerId: user._id,
+                cards: editorRef.current.getCards()[0]
+            }, authorize());
+
+            navigate(`/app/dashboard/${response._id}`);
+        }
 
         setUser({
             ...user,
             dashboards: [...user.dashboards, response._id]
         });
-        setDashboardsList(response);
-        navigate(`/app/dashboard/${response._id}`);
+        addToActiveDashboards(response);
     }
 
     return (
@@ -88,7 +90,7 @@ export default function MyDashboard() {
                         'New Dashboard'
                     )}
                     &nbsp; | &nbsp;
-                    <button onClick={handleSaveButtonClick}>
+                    <button onClick={() => saveModalRef.current.showModal()}>
                         Save
                     </button>
                 </>
