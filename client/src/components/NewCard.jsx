@@ -1,6 +1,8 @@
 import ContentEditable from 'react-contenteditable';
 import { useEffect, useRef, useState } from 'react';
 import { getBackgroundColor } from '../utils';
+import OptionsMenu from './OptionsMenu';
+import OptionsMenuButton from './OptionsMenuButton';
 
 export default function NewCard({ 
     width,
@@ -46,7 +48,12 @@ export default function NewCard({
     }
 
     return (
-        <div style={{ position: 'absolute', zIndex: 1 }}>
+        <div 
+            style={{ 
+                position: 'absolute', 
+                zIndex: 1 
+            }}
+        >
             <div
                 ref={messageInputCardRef}
                 className="card"
@@ -84,41 +91,35 @@ export default function NewCard({
                     ...
                 </button>
             </div>
-            <div
-                className='card'
-                style={{
-                    opacity: `${showOptions ? '1' : '0'}`,
-                    transition: 'opacity 0.5s',
-                    position: 'absolute',
-                    top: position.y,
-                    left: messageInputCardRef.current?.getBoundingClientRect().right
+            <OptionsMenu
+                showOptions={showOptions}
+                position={{
+                    y: position.y,
+                    x: messageInputCardRef.current?.getBoundingClientRect().right
                 }}
+                onClick={handleTypeOptionClick}
             >
-                <div 
-                    className='clickable card'
-                    onClick={() => handleTypeOptionClick('user')}
-                >
-                    User
-                </div>
-                <div 
-                    className='clickable card'
-                    onClick={() => handleTypeOptionClick('assistant')}
-                >
-                    Assistant
-                </div>
-                <div 
-                    className='clickable card'
-                    onClick={() => handleTypeOptionClick('system')}
-                >
-                    System
-                </div>
-                <div 
-                    className='clickable card'
-                    onClick={() => handleTypeOptionClick('note')}
-                >
-                    Note
-                </div>
-            </div>
+                <OptionsMenuButton id={'user'}>
+                    <div className='clickable card'>
+                        User
+                    </div>
+                </OptionsMenuButton>
+                <OptionsMenuButton id={'assistant'}>
+                    <div className='clickable card'>
+                        Assistant
+                    </div>
+                </OptionsMenuButton>
+                <OptionsMenuButton id={'system'}>
+                    <div className='clickable card'>
+                        System
+                    </div>
+                </OptionsMenuButton>
+                <OptionsMenuButton id={'note'}>
+                    <div className='clickable card'>
+                        Note
+                    </div>
+                </OptionsMenuButton>
+            </OptionsMenu>
         </div>
     )
 }
