@@ -41,7 +41,11 @@ const cardSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    name: String
+    name: String,
+    dashboard: {
+        type: Schema.Types.ObjectId,
+        ref: 'dashboard'
+    }
 });
 
 const Card = model('Card', cardSchema);

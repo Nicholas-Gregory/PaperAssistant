@@ -17,6 +17,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
     const [showOptions, setShowOptions] = useState({});
     const [namingCard, setNamingCard] = useState({});
     const [branching, setBranching] = useState([]);
+    const [deleting, setDeleting] = useState({});
     const [error, setError] = useState(null);
     const { authorize } = useAuth();
     const containerDivRef = useRef();
@@ -82,7 +83,8 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                 x: newContextPosition.x,
                 y: newContextPosition.y
             },
-            scale: initScale(content)
+            scale: initScale(content),
+            dashboard: dashboard._id
         };
         const { newClaudeCard, newUserCard } = await apiCall('POST', '/claude', newUserCardData, authorize());
 
@@ -98,7 +100,8 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                 y: parent.position.y + parent.scale.y + 10
             },
             scale: initScale(content),
-            parent: parent._id
+            parent: parent._id,
+            dashboard: dashboard._id
         };
         const { newClaudeCard, newUserCard } = await apiCall('POST', '/claude', newUserCardData, authorize());
 
@@ -111,6 +114,10 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
         setShowOptions({
             ...showOptions,
             [cardId]: !showOptions[cardId]
+        });
+        setDeleting({
+            ...deleting,
+            [cardId]: false
         });
     }
 
@@ -140,6 +147,11 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                 [cardId]: false
             });
             !branching.includes(cardId) && setBranching([...branching, cardId]);
+        } else if (optionId === 'delete') {
+            setDeleting({
+                ...deleting,
+                [cardId]: true
+            });
         }
     }
 
@@ -171,6 +183,10 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                 
             }
         }
+    }
+
+    async function handleDeleteOptionClick(cardId, optionId) {
+
     }
 
     return (
@@ -288,6 +304,25 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                             <OptionsMenuButton id={'delete'}>
                                 <div className="clickable card">
                                     Delete
+                                </div>
+                            </OptionsMenuButton>
+                        </OptionsMenu>
+                        <OptionsMenu
+                            showOptions={deleting[card._id]}
+                            position={{
+                                x: card.position.x + card.scale.x + 13 + 80,
+                                y: card.position.y + 117 - canvasTop()
+                            }}
+                            onClick={id => handleDeleteOptionClick(card._id, id)}
+                        >
+                            <OptionsMenuButton id={'delete-card'}>
+                                <div className="clickable card">
+                                    Card
+                                </div>
+                            </OptionsMenuButton>
+                            <OptionsMenuButton id={'delete-tree'}>
+                                <div className="clickable card">
+                                    Tree
                                 </div>
                             </OptionsMenuButton>
                         </OptionsMenu>

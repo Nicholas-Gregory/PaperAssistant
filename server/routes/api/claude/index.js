@@ -42,7 +42,7 @@ router.post('/', auth, async (req, res, next) => {
             const getMessages = async (card, array) => {
                 const parent = card.parent;
 
-                array.push({ role: card.type, content: getContentArray(card.content) });
+                array.unshift({ role: card.type, content: getContentArray(card.content) });
 
                 if (parent) {
                     return getMessages(await Card.findById(parent), array)
@@ -52,6 +52,9 @@ router.post('/', auth, async (req, res, next) => {
             }
 
             claudeBody.messages = await getMessages(newUserCard, []);
+            for (let message of claudeBody.messages) {
+                console.log('role', message.role, 'content', message.content)
+            }
             // console.log(claudeBody.messages);
         }
 
