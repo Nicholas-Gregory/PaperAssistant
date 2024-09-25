@@ -84,7 +84,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                 y: newContextPosition.y
             },
             scale: initScale(content),
-            dashboard: dashboard._id
+            dashboard: dashboard && dashboard._id
         };
         const { newClaudeCard, newUserCard } = await apiCall('POST', '/claude', newUserCardData, authorize());
 
@@ -101,7 +101,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
             },
             scale: initScale(content),
             parent: parent._id,
-            dashboard: dashboard._id
+            dashboard: dashboard && dashboard._id
         };
         const { newClaudeCard, newUserCard } = await apiCall('POST', '/claude', newUserCardData, authorize());
 
@@ -186,7 +186,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
     }
 
     async function handleDeleteOptionClick(cardId, optionId) {
-
+        const cardIndex = cards.find(card => card._id === cardId);
     }
 
     return (

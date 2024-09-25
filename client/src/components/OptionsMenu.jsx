@@ -21,7 +21,9 @@ export default function OptionsMenu({
                     transition: 'opacity 0.5s',
                     position: 'absolute',
                     top: position.y,
-                    left: position.x
+                    left: position.x,
+                    zIndex: 1,
+                    backgroundColor: 'white'
                 }}
             >
                 {children}

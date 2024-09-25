@@ -46,7 +46,7 @@ export default function NewCard({
     }
 
     return (
-        <>
+        <div style={{ position: 'absolute', zIndex: 1 }}>
             <div
                 ref={messageInputCardRef}
                 className="card"
@@ -119,6 +119,6 @@ export default function NewCard({
                     Note
                 </div>
             </div>
-        </>
+        </div>
     )
 }

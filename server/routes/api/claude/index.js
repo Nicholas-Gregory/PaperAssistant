@@ -52,10 +52,6 @@ router.post('/', auth, async (req, res, next) => {
             }
 
             claudeBody.messages = await getMessages(newUserCard, []);
-            for (let message of claudeBody.messages) {
-                console.log('role', message.role, 'content', message.content)
-            }
-            // console.log(claudeBody.messages);
         }
 
         const response = await axios.post('https://api.anthropic.com/v1/messages', claudeBody, axiosOptions);
