@@ -1,4 +1,5 @@
 const { model, Schema } = require('mongoose');
+const Dashboard = require('./Dashboard.js');
 
 const coordinateSchema = new Schema({
     x: {

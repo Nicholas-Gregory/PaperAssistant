@@ -9,6 +9,7 @@ import OptionsMenu from "./OptionsMenu";
 import OptionsMenuButton from "./OptionsMenuButton";
 import Markdown from 'markdown-to-jsx';
 import ServerError from './ServerError';
+import TemporaryMessage from "./TemporaryMessage";
 
 const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) {
     const [cards, setCards] = useState([]);
@@ -19,6 +20,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
     const [branching, setBranching] = useState([]);
     const [deleting, setDeleting] = useState({});
     const [error, setError] = useState(null);
+    const [message, setMessage] = useState('');
     const { authorize } = useAuth();
     const containerDivRef = useRef();
 
@@ -186,7 +188,51 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
     }
 
     async function handleDeleteOptionClick(cardId, optionId) {
-        const cardIndex = cards.find(card => card._id === cardId);
+        const cardIndex = cards.findIndex(card => card._id === cardId);
+        const card = cards.find(card => card._id === cardId);
+
+        if (optionId === 'delete-card') {
+            const response = await apiCall('DELETE', `/card/card/${cardId}`, null, authorize());
+
+            if (response.error) {
+                setError(response.type);
+                return;
+            }
+
+            setCards(cards => cards.map(c => c._id === card.parent ? (
+                {
+                    ...c,
+                    children: c.children.filter(ca => ca._id !== card._id)
+                }
+            ) : c));
+            setCards(cards => cards.toSpliced(cardIndex, 1));
+            setMessage(`"${response.name || response._id}" deleted!`);
+        } else if (optionId === 'delete-tree') {
+            const response = await apiCall('DELETE', `/card/tree/${cardId}`, null, authorize());
+
+            if (response.error) {
+                setError(response.type);
+                return;
+            }
+
+            const toDelete = [];
+
+            const removeChildren = card => {
+                for (let childId of card.children) {
+                    const child = cards.find(card => card._id === childId);
+
+                    removeChildren(child);
+                }
+
+                toDelete.push(card);
+            }
+
+            removeChildren(card);
+
+            setCards(cards.filter(card => !toDelete.some(cardToDelete => card._id === cardToDelete._id)));
+            
+            setMessage(`Tree of "${response.name || response._id}" deleted!`);
+        }
     }
 
     return (
@@ -197,6 +243,7 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                     AuthenticationError: "Must be logged in!"
                 }}
             />
+            <TemporaryMessage message={message} />
             <div 
                 ref={containerDivRef}
                 style={{ 
@@ -230,7 +277,8 @@ const DashboardEditor = forwardRef(function DashboardEditor({ dashboard }, ref) 
                 })}
                 {cards.map(card => (
                     <>
-                        <Card 
+                        <Card
+                            key={card._id} 
                             position={{
                                 x: card.position.x,
                                 y: card.position.y - canvasTop()
